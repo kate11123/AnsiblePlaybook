@@ -1,0 +1,81 @@
+---
+- name: Install docker, install docker compose and started docker
+  hosts: all
+  become: yes
+
+  tasks:
+
+# install docker
+  - name: Install prerequisites
+    apt:
+      name: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg2' ,'software-properties-common']
+      update_cache: yes
+
+  - name: Add Docker GPG key
+    apt_key: url=https://download.docker.com/linux/ubuntu/gpg
+
+  - name: Add Docker APT repository
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/{{ansible_distribution|lower}} {{ansible_distribution_release}} stable
+
+  - name: Install Docker
+    apt:
+      name: docker-ce
+      update_cache: yes
+# install docker-compose
+
+  - name: Install prerequisites
+    apt:
+      name: ['python3-pip', 'python3-setuptools', 'virtualenv']
+      update_cache: yes
+
+  - name: Install docker-compose
+    pip:
+      name: docker-compose
+- name: Get infos on container
+    docker_container_info:
+      name: frontend
+    register: result
+# delete container
+  - name: Does container exist?
+    debug:
+      msg: "The container {{ 'exists' if result.exists else 'does not exist' }}"
+
+  - name: stopped container
+    docker_container:
+      name: frontend
+      state: stopped
+    when: result.exists
+
+  - name: absent container
+    docker_container:
+      name: frontend
+      state: absent
+    when: result.exists
+
+  - name: Remove image
+    docker_image:
+      state: absent
+      name: kate11123/frontend
+
+# work with dir docker
+  - name: make dir
+    file:
+      path: /home/ubuntu/docker/
+      state: directory
+# work with  compouse
+
+  - name: get docker-compouse file
+    copy:
+      src: /home/ubuntu/ansible/docker-compose.yml
+      dest: /home/ubuntu/docker/
+
+  - name: get docker-compouse file
+    copy:
+      src: /home/ubuntu/ansible/.env
+      dest: /home/ubuntu/docker/
+  - name: docker-compose up
+    docker_compose:
+      project_src: /home/ubuntu/docker/
+    register: output
+
