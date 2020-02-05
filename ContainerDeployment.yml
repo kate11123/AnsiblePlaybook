@@ -22,8 +22,8 @@
     apt:
       name: docker-ce
       update_cache: yes
-# install docker-compose
 
+# install docker-compose
   - name: Install prerequisites
     apt:
       name: ['python3-pip', 'python3-setuptools', 'virtualenv']
@@ -36,6 +36,7 @@
     docker_container_info:
       name: frontend
     register: result
+
 # delete container
   - name: Does container exist?
     debug:
@@ -63,8 +64,8 @@
     file:
       path: /home/ubuntu/docker/
       state: directory
-# work with  compouse
 
+# work with  compouse
   - name: get docker-compouse file
     copy:
       src: /home/ubuntu/ansible/docker-compose.yml
